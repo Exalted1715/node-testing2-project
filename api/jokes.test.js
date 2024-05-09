@@ -24,7 +24,7 @@ it("correct env var", () => {
 })
   
 describe('jokes model functions', () =>{
-    describe("create joke", () =>{
+    describe("[Create Joke]", () =>{
         it("add joke to the db", async () =>{
             let jokes
             await Joke.createJoke(joke1)
@@ -56,4 +56,48 @@ describe('jokes model functions', () =>{
             expect(joke.body).toMatchObject(joke1)
         })
     })
+    describe("[POST] / - create joke", () => {
+        it('adds a new joke to the database', async () => {
+            const response = await request(server).post("/jokes").send(joke1);
+            expect(response.status).toBe(201);
+            expect(response.body).toMatchObject(joke1);
+        });
+    });
+
+    describe("[PUT] /:id - update joke", () => {
+        it('updates an existing joke', async () => {
+            const [joke_id] = await db("jokes").insert(joke1);
+            const updatedJoke = { joke: "Updated joke", punchline: "Updated punchline" };
+            const response = await request(server).put("/jokes/" + joke_id).send(updatedJoke);
+            expect(response.status).toBe(200);
+            expect(response.body).toMatchObject(updatedJoke);
+        });
+    });
+
+    describe("[GET] /:id - get joke by id", () => {
+        it('returns a specific joke by id', async () => {
+            const [joke_id] = await db("jokes").insert(joke1);
+            const response = await request(server).get("/jokes/" + joke_id);
+            expect(response.status).toBe(200);
+            expect(response.body).toMatchObject(joke1);
+        });
+    });
+    describe("[GET] /:id - get joke by id", () => {
+        it('returns 404 if joke with invalid ID is requested', async () => {
+            const invalidId = 999; // Assuming 999 is an invalid ID
+            const response = await request(server).get("/jokes/" + invalidId);
+            expect(response.status).toBe(404);
+        });
+    });
+    describe("[GET] / - get all jokes", () => {
+        it('returns all jokes', async () => {
+            await db("jokes").insert(joke1);
+            await db("jokes").insert(joke2);
+            const response = await request(server).get("/jokes");
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveLength(2);
+        });
+    });
+    
+
 })
