@@ -50,5 +50,10 @@ describe('jokes model functions', () =>{
             joke = await db("jokes").where({joke_id}).first()
             expect(joke).toBeFalsy()
         })
+        it("respond with the deleted joke", async () =>{
+            await db("jokes").insert(joke1)
+            let joke = await request(server).delete("/jokes/1")
+            expect(joke.body).toMatchObject(joke1)
+        })
     })
 })
